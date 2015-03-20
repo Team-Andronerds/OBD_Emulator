@@ -33,7 +33,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Car 1"
-        android:id="@+id/ph2"
+        android:id="@+id/carOne"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"/>
 
@@ -41,7 +41,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Car 3"
-        android:id="@+id/ph3"
+        android:id="@+id/carTwo"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />
 
@@ -49,7 +49,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Car 2"
-        android:id="@+id/ph4"
+        android:id="@+id/carThree"
         android:layout_alignParentTop="true"
         android:layout_centerInParent="true" />
 
@@ -68,7 +68,7 @@
             android:layout_height="wrap_content"
             android:layout_row="0"
             android:layout_column="0"
-            android:id="@+id/VIN0"
+            android:id="@+id/breakButton"
             android:text="Harsh Break"/>
 
         <Button
@@ -76,7 +76,7 @@
             android:layout_height="wrap_content"
             android:layout_row="0"
             android:layout_column="1"
-            android:id="@+id/VIN1"
+            android:id="@+id/accelButton"
             android:text="Harsh Accel"/>
 
         <Button
@@ -84,7 +84,7 @@
             android:layout_height="wrap_content"
             android:layout_row="0"
             android:layout_column="2"
-            android:id="@+id/VIN2"
+            android:id="@+id/turnButton"
             android:text="Harsh Turn"/>
 
         <Button
@@ -92,7 +92,7 @@
             android:layout_height="wrap_content"
             android:layout_row="1"
             android:layout_column="0"
-            android:id="@+id/VIN3"
+            android:id="@+id/fiveButton"
             android:text="5mph Over"/>
 
         <Button
@@ -100,7 +100,7 @@
             android:layout_height="wrap_content"
             android:layout_row="1"
             android:layout_column="1"
-            android:id="@+id/VIN4"
+            android:id="@+id/tenButton"
             android:text="10mph Over"/>
 
         <Button
@@ -108,7 +108,7 @@
             android:layout_height="wrap_content"
             android:layout_row="1"
             android:layout_column="2"
-            android:id="@+id/VIN5"
+            android:id="@+id/fifteenButton"
             android:text="15mph Over"/>
 
         <Button
@@ -116,7 +116,7 @@
             android:layout_height="wrap_content"
             android:layout_row="2"
             android:layout_column="0"
-            android:id="@+id/VIN6"
+            android:id="@+id/crashButton"
             android:text="Crash"/>
 
         <Button
@@ -124,7 +124,7 @@
             android:layout_height="wrap_content"
             android:layout_row="2"
             android:layout_column="1"
-            android:id="@+id/VIN7"
+            android:id="@+id/poiButton"
             android:text="POI"/>
 
         <Button
@@ -132,7 +132,7 @@
             android:layout_height="wrap_content"
             android:layout_row="2"
             android:layout_column="2"
-            android:id="@+id/VIN8"
+            android:id="@+id/lowGasButton"
             android:text="Low Gas"/>
 
     </GridLayout>

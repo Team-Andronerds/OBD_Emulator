@@ -6,7 +6,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -15,7 +15,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
@@ -29,7 +28,7 @@ import java.util.ArrayList;
 import java.util.Set;
 
 
-public class MainActivity extends ActionBarActivity implements AdapterView.OnItemClickListener{
+public class MainActivity extends ActionBarActivity implements Button.OnClickListener{
 
     Set<BluetoothDevice> pairedDevices;
     ArrayAdapter<String> allDevices;
@@ -40,9 +39,24 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     Button refreshButton;
     Button discoverableButton;
     Button serverButton;
+    private static Button accelButt;
+    private static Button breakButt;
+    private static Button turnButt;
+    private static Button fiveButt;
+    private static Button tenButt;
+    private static Button fifteenButt;
+    private static Button crashButt;
+    private static Button poiButt;
+    private static Button lowGasButt;
+    private static Button carOne;
+    private static Button carTwo;
+    private static Button carThree;
+    private static JSONObject currentCar;
     IntentFilter filter;
     BroadcastReceiver receiver;
     String address;
+    private static String secureAddress;
+    private static boolean Driving = false;
     private static BluetoothAdapter adapt;
     private static Boolean pitchingState = false;
     static TextView s_Server;
@@ -58,10 +72,30 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                     s_Server.setText(b.getString("Text"));
                     break;
                 case "HANDSHAKE":
-                    connect(b.getString("From"));
+                    secureAddress = b.getString("From");
+                    connect(secureAddress);
+                    JSONObject handShake = new JSONObject();
+                    try{
+                        handShake.put("Purpose","HANDSHAKE");
+                        handShake.put("From",adapt.getAddress());
+                    }catch(JSONException e){}
+                    writeMessage(handShake);
                     break;
-                case "Reopen":
-                    new AcceptThread().execute();
+                case "DRIVEMODEON":
+                    Driving = true;
+                    setDriveButtons(true);
+                    s_Server.setText("Driving");
+                    Log.d("MainActivity", "Recieved Drive Mode");
+                    break;
+                case "DRIVEMODEOFF":
+                    Driving = false;
+                    setDriveButtons(false);
+                    s_Server.setText("Server open");
+                    //new AcceptThread().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                    break;
+                case "CAR":
+                    writeMessage(currentCar);
+                    break;
             }
 
         }
@@ -104,9 +138,63 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         serverButton.setOnClickListener(new View.OnClickListener(){
             public void onClick(View v){
                 Log.d("Server Button: ", "Pressed");;
-                    new AcceptThread().execute();
+                    new AcceptThread().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             }
         });
+        //
+        carOne = (Button)findViewById(R.id.carOne);
+        carOne.setOnClickListener(new View.OnClickListener(){
+            public void onClick(View v){
+                Log.d("Car One ", "Pressed");
+                setCar(1);
+            }
+        });
+        //
+        carTwo = (Button)findViewById(R.id.carTwo);
+        carTwo.setOnClickListener(new View.OnClickListener(){
+            public void onClick(View v){
+                Log.d("Car Two ", "Pressed");
+                setCar(2);
+            }
+        });
+        //
+        carThree = (Button)findViewById(R.id.carThree);
+        carThree.setOnClickListener(new View.OnClickListener(){
+            public void onClick(View v){
+                Log.d("Car Three ", "Pressed");;
+                setCar(3);
+            }
+        });
+        //
+        breakButt = (Button)findViewById(R.id.breakButton);
+        breakButt.setOnClickListener(this);
+        //
+        accelButt = (Button)findViewById(R.id.accelButton);
+        accelButt.setOnClickListener(this);
+        //
+        turnButt = (Button)findViewById(R.id.turnButton);
+        turnButt.setOnClickListener(this);
+        //
+        fiveButt = (Button)findViewById(R.id.fiveButton);
+        fiveButt.setOnClickListener(this);
+        //
+        tenButt = (Button)findViewById(R.id.tenButton);
+        tenButt.setOnClickListener(this);
+        //
+        fifteenButt = (Button)findViewById(R.id.fifteenButton);
+        fifteenButt.setOnClickListener(this);
+        //
+        crashButt = (Button)findViewById(R.id.crashButton);
+        crashButt.setOnClickListener(this);
+        //
+        poiButt = (Button)findViewById(R.id.poiButton);
+        poiButt.setOnClickListener(this);
+        //
+        lowGasButt = (Button)findViewById(R.id.lowGasButton);
+        lowGasButt.setOnClickListener(this);
+
+        setDriveButtons(false);
+
         pairedDevicesList = new ArrayList<>();
         allDevicesList = new ArrayList<>();
         address = "";
@@ -150,7 +238,61 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
                 }
             }
         };
+        setCar(1);
         refresh();
+    }
+
+    private static void setCar(int CAR){
+        currentCar = new JSONObject();
+        try{
+            currentCar.put("Purpose","CAR");
+            switch (CAR){
+                case 1:
+                    currentCar.put("Year", "1992");
+                    currentCar.put("Make","Nissan Sentra");
+                    currentCar.put("Model","GXE");
+                    currentCar.put("Vin","JN1EB31P6NU133958");
+                    currentCar.put("Color","#969696");
+                    carOne.setEnabled(false);
+                    carTwo.setEnabled(true);
+                    carThree.setEnabled(true);
+                    break;
+                case 2:
+                    currentCar.put("Year", "2003");
+                    currentCar.put("Make","Kia");
+                    currentCar.put("Model","Sportage");
+                    currentCar.put("Vin","9D7FS2FHQ5DI7G5D5");
+                    currentCar.put("Color","#000000");
+                    carOne.setEnabled(true);
+                    carTwo.setEnabled(false);
+                    carThree.setEnabled(true);
+                    break;
+                case 3:
+                    currentCar.put("Year", "1927");
+                    currentCar.put("Make","Nsan Sentra");
+                    currentCar.put("Model","GE");
+                    currentCar.put("Vin","DH698ED9HP7Z11GD6");
+                    currentCar.put("Color","#969696");
+                    carOne.setEnabled(true);
+                    carTwo.setEnabled(true);
+                    carThree.setEnabled(false);
+                    break;
+            }
+        }catch(JSONException e){ e.printStackTrace();}
+    }
+
+    public static JSONObject getCurrentCar(){return currentCar;}
+
+    public static void setDriveButtons(boolean state){
+        breakButt.setEnabled(state);
+        accelButt.setEnabled(state);
+        turnButt.setEnabled(state);
+        fiveButt.setEnabled(state);
+        tenButt.setEnabled(state);
+        fifteenButt.setEnabled(state);
+        crashButt.setEnabled(state);
+        poiButt.setEnabled(state);
+        lowGasButt.setEnabled(state);
     }
 
     public static Boolean isPitching(){
@@ -161,7 +303,11 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
         pitchingState = x;
     }
 
-    public static void sendMessage(JSONObject job){
+    public static boolean isDriving(){
+        return Driving;
+    }
+
+    public static void writeMessage(JSONObject job){
 
         Message msg = Message.obtain();
         Bundle b = new Bundle();
@@ -179,14 +325,7 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
             pitchingState = true;
             Log.d("Connecting with", job.toString());
 
-            JSONObject handShake = new JSONObject();
-            try{
-                handShake.put("Purpose","HANDSHAKE");
-                handShake.put("From",adapt.getAddress());
-            }catch(JSONException e){}
-            sendMessage(handShake);
-
-            new SendThread().execute(job);
+            new SendThread().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR,job);
 
         }catch(JSONException e){}
 
@@ -292,32 +431,43 @@ public class MainActivity extends ActionBarActivity implements AdapterView.OnIte
     }
 
     @Override
-    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-        if(adapt.isDiscovering()){
-            adapt.cancelDiscovery();
-        }
-        if(allDevices.getItem(position).contains("PAIRED")){
-            if(!address.equals("")){
-                listView.setItemChecked(position, false);
-                view.setBackgroundColor(Color.TRANSPARENT);
-
-                address = "";
-            }else{
-                listView.setItemChecked(position, true);
-                view.setBackgroundColor(Color.CYAN);
-
-                if(pairedDevices.size() > 0){
-                    for(BluetoothDevice device : pairedDevices){
-                        if(allDevices.getItem(position).contains(device.getAddress())){
-                            address = device.getAddress();
-                        }
-                    }
-                }
-
+    public void onClick(View v) {
+        JSONObject job = new JSONObject();
+        try{
+            job.put("Purpose","Driving");
+            switch (v.getId()){
+                case R.id.accelButton:
+                    job.put("Event","accel");
+                    break;
+                case R.id.breakButton:
+                    job.put("Event","break");
+                    break;
+                case R.id.turnButton:
+                    job.put("Event","turn");
+                    break;
+                case R.id.fiveButton:
+                    job.put("Event","five");
+                    break;
+                case R.id.tenButton:
+                    job.put("Event","ten");
+                    break;
+                case R.id.fifteenButton:
+                    job.put("Event","fifteen");
+                    break;
+                case R.id.crashButton:
+                    job.put("Event","crash");
+                    break;
+                case R.id.poiButton:
+                    job.put("Event","poi");
+                    break;
+                case R.id.lowGasButton:
+                    job.put("Event","lowGas");
+                    break;
             }
-        }else{
-            Toast.makeText(getApplicationContext(), "device is not paired", Toast.LENGTH_SHORT).show();
+            Log.d("Event JSON:", job.toString());
+            writeMessage(job);
+        }catch(JSONException e){
+
         }
     }
 }

@@ -62,9 +62,10 @@ public class SendThread extends AsyncTask<JSONObject, Integer, Void> {
             Log.d("parse", "failed");
         }
 
+
         // Get a BluetoothSocket to connect with the given BluetoothDevice
             do{
-            while(waitingForMessage){};
+            while(waitingForMessage && MainActivity.isPitching()){};
             try {
                 // MY_UUID is the app's UUID string, also used by the server code
                 tmp = catcher.createInsecureRfcommSocketToServiceRecord(UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"));
@@ -116,6 +117,7 @@ public class SendThread extends AsyncTask<JSONObject, Integer, Void> {
             if (mmOutputStream != null) {
                 Log.d("manager: ", "Writing bytes of " + ball.toString());
 
+                try{Thread.sleep(50);}catch(InterruptedException e){e.printStackTrace();}
                 mmOutputStream.write(ball.toString().getBytes());
                 mmOutputStream.flush();
                 Log.d("manager: ","Writing successful");
@@ -124,34 +126,12 @@ public class SendThread extends AsyncTask<JSONObject, Integer, Void> {
             Log.d("manager: ", "Writing failed");
         }
 
-        try{
-            if(ball.getString("Purpose").equals("HANDSHAKE")){
-                MainActivity.setPitchingState(false);
-            }
-        }catch(JSONException e){
-            e.printStackTrace();
-        }
-
         waitingForMessage = true;
     }
 
     @Override
     protected void onPostExecute(Void aVoid) {
         super.onPostExecute(aVoid);
-        MainActivity.setPitchingState(false);
-        Log.d("Pitching","Finished");
-
-        Message msg = Message.obtain();
-        Bundle b = new Bundle();
-        b.putString("Purpose","serverStatus");
-        b.putString("Text","Server Open");
-        msg.setData(b);
-        MainActivity.mHandler.sendMessage(msg);
-
-        msg = Message.obtain();
-        b = new Bundle();
-        b.putString("Purpose","Reopen");
-        msg.setData(b);
-        MainActivity.mHandler.sendMessage(msg);
+        Log.d("Send Thread","CLOSED");
     }
 }

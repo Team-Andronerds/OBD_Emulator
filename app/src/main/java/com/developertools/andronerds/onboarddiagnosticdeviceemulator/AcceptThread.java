@@ -19,6 +19,8 @@ public class AcceptThread extends AsyncTask {
     public static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     private BluetoothServerSocket mmServerSocket;
     private static boolean serving = true;
+    private static Message msg1;
+    private static Bundle b;
     public static final int MESSAGE_READ = 1;
     public static final Handler mHandler = new Handler(){
         @Override
@@ -32,11 +34,13 @@ public class AcceptThread extends AsyncTask {
                     Log.d("Message is: ", "" + readmsg);
                     try {
                         job = new JSONObject(readmsg);
-                        Log.d("JSON is: ", job.toString());
+                        //Log.d("JSON is: ", job.toString());
+                        Log.d("Purpose is:", job.getString("Purpose"));
                         switch(job.getString("Purpose")){
                             case "HANDSHAKE":
-                                Message msg1 = Message.obtain();
-                                Bundle b = new Bundle();
+                                Log.d("case", "HANDSHAKE");
+                                msg1 = Message.obtain();
+                                b = new Bundle();
                                 b.putString("Purpose","HANDSHAKE");
                                 b.putString("From",job.getString("From"));
                                 msg1.setData(b);
@@ -44,9 +48,35 @@ public class AcceptThread extends AsyncTask {
                                 break;
                             case "DISCONNECT":
                                 serving = false;
+                                MainActivity.setPitchingState(false);
+                                break;
+                            case "DRIVEMODEON":
+                                Log.d("Case","DRIVEMODEON");
+                                msg1 = Message.obtain();
+                                b = new Bundle();
+                                b.putString("Purpose","DRIVEMODEON");
+                                msg1.setData(b);
+                                MainActivity.mHandler.sendMessage(msg1);
+                                break;
+                            case "DRIVEMODEOFF":
+                                Log.d("Case","DRIVEMODEOFF");
+                                msg1 = Message.obtain();
+                                b = new Bundle();
+                                b.putString("Purpose","DRIVEMODEOFF");
+                                msg1.setData(b);
+                                MainActivity.mHandler.sendMessage(msg1);
+                                break;
+                            case "CAR":
+                                Log.d("Case","CAR REQUESTED");
+                                msg1 = Message.obtain();
+                                b = new Bundle();
+                                b.putString("Purpose","CAR");
+                                msg1.setData(b);
+                                MainActivity.mHandler.sendMessage(msg1);
                                 break;
                         }
                     }catch(JSONException e){
+                        Log.d("FAILED", e.toString());
                         e.printStackTrace();
                     }
             }
@@ -82,7 +112,6 @@ public class AcceptThread extends AsyncTask {
         BluetoothSocket socket = null;
         byte[] buffer = new byte[1024];
         int bytes;
-        String s;
 
         // Keep listening until exception occurs or a socket is returned
         while(mmServerSocket==null);
@@ -92,11 +121,11 @@ public class AcceptThread extends AsyncTask {
         b.putString("Text","Server Open");
         msg.setData(b);
         MainActivity.mHandler.sendMessage(msg);
-        while(serving && !MainActivity.isPitching()) {
+        while(serving) {
 
             try {
                 Log.d("Run", "trying accept");
-                if (serving & !MainActivity.isPitching()) {
+                if (serving) {
                     socket = mmServerSocket.accept();
                     Log.d("Run:", "mmSeverSocket accept SUCCESS");
                 }else{
@@ -126,6 +155,10 @@ public class AcceptThread extends AsyncTask {
             mmServerSocket.close();
         } catch (IOException e) {}
 
+        if(MainActivity.isDriving()){
+            Log.d("Driving engaged","Closing listener");
+            return null;
+        }
         Log.d("Disconnecting","...");
         msg = Message.obtain();
         b = new Bundle();
@@ -138,5 +171,11 @@ public class AcceptThread extends AsyncTask {
         msg.setData(b);
         MainActivity.mHandler.sendMessage(msg);
         return null;
+    }
+
+    @Override
+    protected void onPostExecute(Object o) {
+        super.onPostExecute(o);
+        Log.d("AcceptThread","CLOSED");
     }
 }
