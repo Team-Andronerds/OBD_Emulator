@@ -268,11 +268,11 @@ public class MainActivity extends ActionBarActivity implements Button.OnClickLis
                     carThree.setEnabled(true);
                     break;
                 case 3:
-                    currentCar.put("Year", "1927");
-                    currentCar.put("Make","Nsan Sentra");
-                    currentCar.put("Model","GE");
+                    currentCar.put("Year", "2004");
+                    currentCar.put("Make","Honda");
+                    currentCar.put("Model","Accord");
                     currentCar.put("Vin","DH698ED9HP7Z11GD6");
-                    currentCar.put("Color","#969696");
+                    currentCar.put("Color","#FFFFFF");
                     carOne.setEnabled(true);
                     carTwo.setEnabled(true);
                     carThree.setEnabled(false);
